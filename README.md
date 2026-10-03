@@ -29,8 +29,6 @@ En el video muestro el funcionamiento de la VPN entre el router Cisco y el Forti
 9. [Compatibilidad de la VPN entre Cisco y FortiGate](#9-compatibilidad-de-la-vpn-entre-cisco-y-fortigate)
 10. [Dispositivos finales](#10-dispositivos-finales)
 11. [Verificación del funcionamiento](#11-verificación-del-funcionamiento)
-12. [Problemas que encontré y cómo los resolví](#12-problemas-que-encontré-y-cómo-los-resolví)
-
 ---
 
 ## 1. Propósito de la práctica
