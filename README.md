@@ -869,11 +869,7 @@ iface eth0 inet static
 
 ---
 
-## 11. Verificación del funcionamiento
-
-Las pruebas completas están en el [video](#video-de-demostración). Los comandos están en [`scripts/hosts/pruebas_usuario.sh`](scripts/hosts/pruebas_usuario.sh) y [`scripts/router/`](scripts/router/).
-
-### 11.1 Con la VPN arriba
+### 11 Con la VPN arriba
 
 Desde el Usuario:
 
@@ -890,7 +886,7 @@ curl -k https://10.13.25.130
 | curl -k https | Devuelve `<h1>Servidor Web - Sitio 2 - Omar Paulino 20251325</h1>` |
 | `show crypto ipsec sa` en el router | Los contadores `#pkts encaps` y `#pkts decaps` aumentan |
 
-### 11.2 Con la VPN abajo
+### 11.1 Con la VPN abajo
 
 Para tumbar la VPN quité el crypto map de la WAN del router y borré las SA:
 
