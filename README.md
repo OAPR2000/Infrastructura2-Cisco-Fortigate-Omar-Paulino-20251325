@@ -8,8 +8,8 @@
 ---
 
 ## Video de demostración
+https://youtu.be/-F4fazj-JWs?si=JB2MO5hgP9IBSI-A
 
-**[Ver el video de la práctica](PEGAR_AQUI_EL_LINK_DEL_VIDEO)**
 
 En el video muestro el funcionamiento de la VPN entre el router Cisco y el FortiGate:
 
