@@ -1,0 +1,16 @@
+! R1-1325 - Comandos de verificacion
+show version | include Software
+show ip interface brief
+show running-config
+show ip route
+show ip dhcp pool
+show ip dhcp binding
+show ip nat statistics
+show ip nat translations
+show crypto isakmp policy
+show crypto ipsec transform-set
+show crypto map
+show crypto isakmp sa
+show crypto ipsec sa
+ping 200.25.13.25
+ping 192.168.42.1 source 192.168.42.13

@@ -1,0 +1,85 @@
+! R1-1325 (Cisco c2691) - Configuracion completa por CLI
+! Pegar en la consola del router, bloque por bloque.
+enable
+configure terminal
+hostname R1-1325
+no ip domain-lookup
+!
+! ---------- 1) Interfaces ----------
+interface FastEthernet0/0
+ description WAN hacia ISP (IOSvL2-1)
+ ip address 200.25.13.13 255.255.255.224
+ ip address 192.168.42.13 255.255.255.0 secondary
+ ip nat outside
+ no shutdown
+!
+interface FastEthernet0/1
+ description LAN troncal hacia IOSvL2-2
+ no ip address
+ no shutdown
+!
+interface FastEthernet0/1.10
+ description VLAN10 USUARIOS
+ encapsulation dot1Q 10
+ ip address 10.13.25.1 255.255.255.128
+ ip nat inside
+exit
+!
+! ---------- 2) DHCP para la VLAN 10 ----------
+ip dhcp excluded-address 10.13.25.1 10.13.25.9
+ip dhcp excluded-address 10.13.25.101 10.13.25.127
+ip dhcp pool VLAN10-USUARIOS
+ network 10.13.25.0 255.255.255.128
+ default-router 10.13.25.1
+ dns-server 8.8.8.8 1.1.1.1
+exit
+!
+! ---------- 3) Ruta por defecto ----------
+ip route 0.0.0.0 0.0.0.0 192.168.42.1
+!
+! ---------- 4) NAT (PAT) hacia Internet ----------
+ip access-list extended NAT-USUARIOS
+ deny   ip 10.13.25.0 0.0.0.127 10.13.25.128 0.0.0.15
+ permit ip 10.13.25.0 0.0.0.127 any
+exit
+ip nat pool SALIDA-INTERNET 192.168.42.13 192.168.42.13 netmask 255.255.255.0
+ip nat inside source list NAT-USUARIOS pool SALIDA-INTERNET overload
+!
+! ---------- 5) VPN IPsec Site-to-Site ----------
+! Fase 1 (ISAKMP / IKEv1)
+crypto isakmp policy 10
+ encryption des
+ hash md5
+ authentication pre-share
+ group 5
+ lifetime 86400
+exit
+crypto isakmp key Vpn#20251325 address 200.25.13.25
+crypto isakmp keepalive 10 3
+!
+! Fase 2 (IPsec)
+crypto ipsec transform-set TS-1325 esp-des esp-md5-hmac
+ mode tunnel
+exit
+!
+! Trafico interesante (lo que se cifra)
+ip access-list extended VPN-TRAFICO
+ permit ip 10.13.25.0 0.0.0.127 10.13.25.128 0.0.0.15
+exit
+!
+! Crypto map
+crypto map CMAP-1325 10 ipsec-isakmp
+ set peer 200.25.13.25
+ set transform-set TS-1325
+ set pfs group5
+ set security-association lifetime seconds 3600
+ match address VPN-TRAFICO
+exit
+!
+interface FastEthernet0/0
+ crypto map CMAP-1325
+end
+!
+clear crypto sa
+clear crypto isakmp
+write memory

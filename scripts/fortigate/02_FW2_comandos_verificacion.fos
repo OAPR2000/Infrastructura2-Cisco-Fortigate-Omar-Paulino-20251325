@@ -1,0 +1,13 @@
+# FMW2-1325 - Comandos para sacar el running-config y ver el tunel
+show system global
+show system interface port1
+show system interface port2
+show system dns
+show router static
+show firewall address
+show firewall addrgrp
+show firewall policy
+show vpn ipsec phase1-interface
+show vpn ipsec phase2-interface
+get vpn ipsec tunnel summary
+diagnose vpn tunnel list

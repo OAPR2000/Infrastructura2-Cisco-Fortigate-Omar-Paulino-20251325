@@ -1,0 +1,13 @@
+! Bajar la VPN (para la prueba sin tunel)
+configure terminal
+interface FastEthernet0/0
+ no crypto map CMAP-1325
+end
+clear crypto sa
+clear crypto isakmp
+!
+! Subir la VPN otra vez
+configure terminal
+interface FastEthernet0/0
+ crypto map CMAP-1325
+end
