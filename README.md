@@ -1,4 +1,3 @@
-
 # Infraestructura 2: VPN Site-to-Site Router Cisco ↔ FortiGate
 
 **Autor:** Omar Paulino
@@ -8,8 +7,7 @@
 ---
 
 ## Video de demostración
-https://youtu.be/-F4fazj-JWs?si=JB2MO5hgP9IBSI-A
-
+https://youtu.be/-F4fazj-JWs?si=f5Ehrpx_szPlH_iE
 
 En el video muestro el funcionamiento de la VPN entre el router Cisco y el FortiGate:
 
@@ -30,6 +28,9 @@ En el video muestro el funcionamiento de la VPN entre el router Cisco y el Forti
 8. [FortiGate FMW2-1325](#8-fortigate-fmw2-1325)
 9. [Compatibilidad de la VPN entre Cisco y FortiGate](#9-compatibilidad-de-la-vpn-entre-cisco-y-fortigate)
 10. [Dispositivos finales](#10-dispositivos-finales)
+11. [Verificación del funcionamiento](#11-verificación-del-funcionamiento)
+12. [Problemas que encontré y cómo los resolví](#12-problemas-que-encontré-y-cómo-los-resolví)
+
 ---
 
 ## 1. Propósito de la práctica
@@ -863,3 +864,56 @@ iface eth0 inet static
 	netmask 255.255.255.0
 	gateway 192.168.25.1
 ```
+
+---
+
+## 11. Verificación del funcionamiento
+
+Las pruebas completas están en el [video](#video-de-demostración). Los comandos están en [`scripts/hosts/pruebas_usuario.sh`](scripts/hosts/pruebas_usuario.sh) y [`scripts/router/`](scripts/router/).
+
+### 11.1 Con la VPN arriba
+
+Desde el Usuario:
+
+```bash
+ping -c 4 10.13.25.130
+traceroute 10.13.25.130
+curl -k https://10.13.25.130
+```
+
+| Prueba | Resultado esperado |
+| --- | --- |
+| ping 10.13.25.130 | Responde |
+| traceroute 10.13.25.130 | Pasa por `10.13.25.1` (R1-1325) y llega a `10.13.25.130` sin pasar por el gateway del ISP |
+| curl -k https | Devuelve `<h1>Servidor Web - Sitio 2 - Omar Paulino 20251325</h1>` |
+| `show crypto ipsec sa` en el router | Los contadores `#pkts encaps` y `#pkts decaps` aumentan |
+
+### 11.2 Con la VPN abajo
+
+Para tumbar la VPN quité el crypto map de la WAN del router y borré las SA:
+
+```
+configure terminal
+interface FastEthernet0/0
+ no crypto map CMAP-1325
+end
+clear crypto sa
+clear crypto isakmp
+```
+
+| Prueba | Resultado esperado | Por qué |
+| --- | --- | --- |
+| ping 10.13.25.130 | 100% de pérdida | Sin crypto map, el paquete sale sin cifrar por la ruta por defecto con IP privada, y NAT1 lo descarta |
+| curl -k https://10.13.25.130 | Timeout | Igual que el ping |
+| ping 8.8.8.8 | Responde | La salida a Internet no depende de la VPN, sino del NAT |
+
+Para volver a subirla:
+
+```
+configure terminal
+interface FastEthernet0/0
+ crypto map CMAP-1325
+end
+```
+
+En el FortiGate no hace falta tocar nada: con *Auto-negotiate* activado renegocia el túnel en cuanto el router vuelve a aceptar la VPN.
